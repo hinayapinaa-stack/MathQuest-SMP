@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /leaderboard/{groupId} {
+      allow read: if true;
+      // Catatan: aturan ini hanya cocok untuk prototipe kelas privat.
+      // Untuk rilis publik, wajib validasi skor di server/Cloud Functions
+      // dan batasi write/reset dengan Firebase Authentication custom claims.
+      allow create, update: if request.resource.data.keys().hasAll(['group','score','updatedAt'])
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0
+        && request.resource.data.group is string;
+      allow delete: if false;
+    }
+  }
+}
